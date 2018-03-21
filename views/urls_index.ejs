@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>TinyApp</title>
+  </head>
+  <body>
+    <header>
+      <% include partials/_headers %>
+    </header>
+    <ul>
+    <% for(var i=0; i < (Object.values(urls)).length; i++) { %>
+        <li>
+          <a href= <%= Object.values(urls)[i] %> >
+          URLs: <%= Object.values(urls)[i] %> - Short URLs: <%= Object.keys(urls)[i] %>
+          <form method="POST" action="/urls/<%= Object.keys(urls)[i] %>/delete"><button type"button">DELETE</button></form>
+          <form method="GET" action="/urls/<%= Object.keys(urls)[i]%>""><button type"button">EDIT</button></form>
+          </a>
+        </li>
+    <% } %>
+
+    </ul>
+    <button type="text" ><a href="http://localhost:8080/urls/new">Shorten an URL</a> </button>
+
+  </body>
+</html>

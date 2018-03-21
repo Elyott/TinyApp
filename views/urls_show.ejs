@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>TinyApp</title>
+  </head>
+  <body>
+  <header>
+    <% include partials/_headers %>
+  </header>
+  <form action="/urls/<%= shortURL %>" method="POST" ">
+    <ul>
+        <li><%= urls[shortURL] %>  =>  Short URL: <%= shortURL %></li>
+          <label for="longURL">Update:</label>
+          <input id="longURL" type="text" name="longURL" placeholder="http://" style="width: 300px">
+          <input type="submit" value="Submit">
+
+    </ul>
+  </form>
+  <button type="button"><a href= <%= urls[shortURL] %> > GO TO URL</a></button>
+  <button type="text" ><a href="http://localhost:8080/urls/new">Shorten another URL</a> </button>
+  <button type="text" ><a href="http://localhost:8080/urls">Home</a> </button>
+  </body>
+</html>
