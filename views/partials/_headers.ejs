@@ -5,5 +5,12 @@
   </head>
   <body>
   <p> URL Shortener </p>
+    <b>Username: <%= username %> </b>
+    <form action="/login" method="POST" ">
+          <label for="username">Username:</label>
+          <input id="username" type="text" name="username" placeholder="Username" style="width: 300px">
+          <input type="submit" value="Submit">
+  </form>
+
   </body>
 </html>
