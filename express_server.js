@@ -11,7 +11,20 @@ var urlDatabase = {
   "b2xVn2": "http://www.lighthouselabs.ca",
   "9sm5xK": "http://www.google.com"
 };
-const cookieObj = {};
+
+const users = {
+  "userRandomID": {
+    id: "userRandomID",
+    email: "user@example.com",
+    password: "purple-monkey-dinosaur"
+  },
+ "user2RandomID": {
+    id: "user2RandomID",
+    email: "user2@example.com",
+    password: "dishwasher-funk"
+  }
+};
+
 app.set('view engine', 'ejs');
 
 app.get('/', (req, res) =>{
@@ -27,16 +40,14 @@ app.get('/hello', (req, res) => {
 });
 
 app.get("/urls/new", (req, res) => {
-  let templateVars = {
-    username: req.cookies['username']
-  };
+  let templateVars = { user: req.cookies['user_id'] };
   res.render("urls_new", templateVars);
 });
 
 app.get("/urls", (req, res) => {
   let templateVars = {
     urls: urlDatabase,
-    username: req.cookies['username']
+    user: req.cookies['user_id']
   };
   res.render('urls_index', templateVars);
 });
@@ -51,7 +62,7 @@ app.get("/urls/:id", (req, res) =>{
   let templateVars = {
     shortURL: req.params.id,
     urls: urlDatabase,
-    username: req.cookies['username']
+    user: req.cookies['user_id']
   };
   res.render("urls_show", templateVars);
 });
@@ -66,19 +77,52 @@ app.get("/u/:shortURL", (req, res) => {
   res.redirect(longURL)
 });
 
+app.get("/register", (req, res) => {
+  let templateVars = { user: req.cookies['user_id'] };
+  res.render('register', templateVars);
+});
+
+app.get("/login", (req, res) => {
+  let templateVars = { user: req.cookies['user_id'] };
+  res.render('login', templateVars);
+});
+
 app.post("/login", (req, res) => {
-  res.cookie('username', req.body.username)
-  res.redirect("/urls")
+  for(user in users){
+    if(users[user].email === req.body.email && users[user].password === req.body.password){
+      res.cookie('user_id', user);
+      res.redirect('/urls')
+    };
+  };
+  res.statusCode = 403;
+  res.end();
 });
 
 app.post("/logout", (req, res) => {
-  res.clearCookie('username');
+  res.clearCookie('user_id');
   res.redirect("/urls")
 });
 
 app.post("/urls/:id/delete", (req, res) => {
   delete urlDatabase[req.params.id];
   res.redirect('/urls');
+});
+
+app.post("/register", (req, res) => {
+  if(req.body.email === '' || req.body.password === ''){
+    res.statusCode = 400;
+    res.end();
+  } else{
+  let newID = generateRandomString();
+  users[newID] = {
+    id: newID,
+    email: req.body.email,
+    password: req.body.password
+  };
+  res.cookie('user_id', newID);
+  console.log(users);
+  res.redirect('/urls');
+  }
 });
 
 function generateRandomString() {
