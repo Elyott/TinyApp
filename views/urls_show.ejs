@@ -3,21 +3,16 @@
   <head>
     <title>TinyApp</title>
   </head>
-  <body>
+  <body style="font-size:18px; padding:25px;">
   <header>
     <% include partials/_header %>
   </header>
   <form action="/urls/<%= shortURL %>" method="POST" ">
-    <ul>
-        <li>
-          <p>Long URL: <%= urls[shortURL].longurl %></p>
           <p>Short URL: <%= shortURL %></p>
-        </li>
+          <p>Long URL: <%= urls[shortURL].longurl %></p>
           <label for="longURL">Update Long URL:</label>
-          <input id="longURL" type="text" name="longURL" placeholder="http://" style="width: 300px">
+          <input id="longURL" type="text" name="longURL" value="<%= urls[shortURL].longurl %>" style="width: 300px">
           <input type="submit" value="Submit">
-
-    </ul>
   </form>
   <button type="button"><a href= <%= urls[shortURL].longurl %> > GO TO URL</a></button>
   <button type="text" ><a href="http://localhost:8080/urls/new">Shorten another URL</a> </button>

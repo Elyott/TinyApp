@@ -3,34 +3,36 @@
   <head>
     <title>TinyApp</title>
   </head>
-  <body>
+  <body style="font-size:18px; padding:25px;">
     <header>
       <% include partials/_header %>
     </header>
-    <p style="margin-bottom: 20px;"></p>
-    <b > Your List Of Your URLs: </b >
-    <% if(user) { %>
-    <% let test = false; %>
-      <ul>
-        <% for(var i=0; i < (Object.values(urls)).length; i++) { %>
-            <% if(urls[Object.keys(urls)[i]].userID === user){ %>
-              <li>
-                <a href= <%= urls[Object.keys(urls)[i]].longurl %> >
-                URLs: <%= urls[Object.keys(urls)[i]].longurl %> - Short URLs: <%= Object.keys(urls)[i] %>
-                <form method="POST" action="/urls/<%= Object.keys(urls)[i] %>/delete"><button type"button">DELETE</button></form>
-                <form method="GET" action="/urls/<%= Object.keys(urls)[i]%>""><button type"button">EDIT</button></form>
-                </a>
-              </li>
-              <% test = true; %>
-            <% } %>
+    <p></p>
+    <form style="margin:25px;">
+      <b> Your List Of Your URLs: </b>
+      <% if(user) { %>
+      <% let test = false; %>
+        <ul>
+          <% for(var i=0; i < (Object.values(urls)).length; i++) { %>
+              <% if(urls[Object.keys(urls)[i]].userID === user){ %>
+                <li>
+                  <a href= <%= urls[Object.keys(urls)[i]].longurl %> >
+                  URLs: <%= urls[Object.keys(urls)[i]].longurl %> - Short URLs: <%= Object.keys(urls)[i] %>
+                  <form method="POST" action="/urls/<%= Object.keys(urls)[i] %>/delete"><button type"button">DELETE</button></form>
+                  <form method="GET" action="/urls/<%= Object.keys(urls)[i]%>""><button type"button">EDIT</button></form>
+                  </a>
+                </li>
+                <% test = true; %>
+              <% } %>
+          <% } %>
+        </ul>
+        <% if(!test) { %>
+          <p> No Shortened URLs Available </p>
         <% } %>
-      </ul>
-      <% if(!test) { %>
-        <p> No Shortened URLs Available </p>
+        <button type="text" ><a href="http://localhost:8080/urls/new">Shorten an URL</a> </button>
+      <% } else { %>
+        <p> Please Login to Shorten an URL </p>
       <% } %>
-      <button type="text" ><a href="http://localhost:8080/urls/new">Shorten an URL</a> </button>
-    <% } else { %>
-      <p> Please Login to Shorten an URL </p>
-    <% } %>
+    <form>
   </body>
 </html>

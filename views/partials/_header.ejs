@@ -6,7 +6,7 @@
   <body>
   <p> URL Shortener </p>
   <% if(user){ %>
-    <b>Email: <%= user %> </b>
+    <p>Email: <%= userInfo.email %> </p>
     <form action="/logout" method="POST" >
       <button type"button">LOGOUT</button>
     </form>

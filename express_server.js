@@ -9,7 +9,7 @@ app.use(cookieSession({
   name: 'session',
   keys: ['key1'],
 }))
-
+app.set('view engine', 'ejs');
 
 var urlDatabase = {
   "b2xVn2": {
@@ -35,22 +35,19 @@ const users = {
   }
 };
 
-app.set('view engine', 'ejs');
-
 app.get('/', (req, res) =>{
-  res.end('Hello!');
-});
-
-app.get('/urls.json', (req, res) => {
-  res.json(urlDatabase);
-});
-
-app.get('/hello', (req, res) => {
-  res.end("<html><body>Hello <b>World</b></body></html>\n");
+  if(req.session.user_id){
+    res.redirect("urls");
+  }else{
+  res.redirect('/login');
+  }
 });
 
 app.get("/urls/new", (req, res) => {
-  let templateVars = { user: req.session.user_id };
+  let templateVars = {
+    user: req.session.user_id,
+    userInfo: users[req.session.user_id]
+  };
   if(req.session.user_id){
     res.render("urls_new", templateVars);
   }else{
@@ -61,14 +58,22 @@ app.get("/urls/new", (req, res) => {
 app.get("/urls", (req, res) => {
   let templateVars = {
     urls: urlDatabase,
-    user: req.session.user_id
+    user: req.session.user_id,
+    userInfo: users[req.session.user_id]
   };
   res.render('urls_index', templateVars);
 });
 
 app.get("/login", (req, res) => {
-  let templateVars = { user: req.session.user_id };
-  res.render('login', templateVars);
+  if(!req.session.user_id){
+  let templateVars = {
+    user: req.session.user_id,
+    userInfo: users[req.session.user_id]
+  };
+    res.render('login', templateVars);
+  }else{
+    res.redirect('/urls');
+  }
 });
 
 app.get("/urls/:id", (req, res) =>{
@@ -76,9 +81,10 @@ app.get("/urls/:id", (req, res) =>{
     let templateVars = {
       shortURL: req.params.id,
       urls: urlDatabase,
-      user: req.session.user_id
-  };
-  res.render("urls_show", templateVars);
+      user: req.session.user_id,
+      userInfo: users[req.session.user_id]
+    };
+    res.render("urls_show", templateVars);
   } else {
     res.redirect('/urls');
   }
@@ -89,10 +95,18 @@ app.get("/u/:shortURL", (req, res) => {
 });
 
 app.get("/register", (req, res) => {
-  let templateVars = { user: req.session.user_id };
-  res.render('register', templateVars);
+  if(!req.session.user_id){
+  let templateVars = {
+    user: req.session.user_id,
+    userInfo: users[req.session.user_id]
+  };
+    res.render('register', templateVars);
+  }else{
+    res.redirect('/urls');
+  }
 });
 
+//randomly generates a new short url and stores it in urldatabase then redirects to new created page for shorturl
 app.post("/urls", (req, res) =>{
   if(req.session.user_id){
     let  newShortURL = generateRandomString();
@@ -103,9 +117,10 @@ app.post("/urls", (req, res) =>{
     res.redirect(`/urls/${newShortURL}`);
   } else {
     res.redirect('/urls');
-  };
+  }
 });
 
+//updates long url to new long url from user
 app.post("/urls/:id", (req, res) => {
   if(req.session.user_id === urlDatabase[req.params.id].userID){
     urlDatabase[req.params.id].longurl = Object.values(req.body)[0];
@@ -113,22 +128,31 @@ app.post("/urls/:id", (req, res) => {
   res.redirect('/urls');
 });
 
+//checks if the login info matches the stored user info
 app.post("/login", (req, res) => {
+  let emailNotFound = false;
   for(user in users){
     if(users[user].email === req.body.email && bcrypt.compareSync(req.body.password, users[user].password)){
-      req.session.user_id = user;
-      res.redirect('/urls')
-    };
+      req.session.user_id = user; //creates a cookie with userid on it
+      res.redirect('/urls');
+      return;
+    }
   };
-  res.statusCode = 403;
-  res.end();
+  //this makes sure the above loop is run first and doesn't prematurely send the 403 status code
+  emailNotFound = true;
+  if(emailNotFound){
+    res.statusCode = 403;
+    res.end();
+  };
 });
 
+//deletes login cookie
 app.post("/logout", (req, res) => {
   req.session = null;
-  res.redirect("/urls")
+  res.redirect("/urls");
 });
 
+//removes short url from urldatabase
 app.post("/urls/:id/delete", (req, res) => {
   if(req.session.user_id === urlDatabase[req.params.id].userID){
     delete urlDatabase[req.params.id];
@@ -136,21 +160,28 @@ app.post("/urls/:id/delete", (req, res) => {
   res.redirect('/urls');
 });
 
+//creates a new user id
 app.post("/register", (req, res) => {
+  for(user in users){
+    if(users[user].email === req.body.email){
+      res.statusCode = 400;
+      res.end();
+    }
+  }
   if(!req.body.email || !req.body.password){
     res.statusCode = 400;
     res.end();
-  } else{
-  const hashedPassword = bcrypt.hashSync(req.body.password, 10);
-  let newID = generateRandomString();
-  users[newID] = {
-    id: newID,
-    email: req.body.email,
-    password: hashedPassword
-  };
-  console.log(users);
-  req.session.user_id = newID;
-  res.redirect('/urls');
+  }else{
+    //hashes the password then saves the hashed password
+    const hashedPassword = bcrypt.hashSync(req.body.password, 10);
+    let newID = generateRandomString();
+    users[newID] = {
+      id: newID,
+      email: req.body.email,
+      password: hashedPassword
+    };
+    req.session.user_id = newID; //creates a cookie with userid on it
+    res.redirect('/urls');
   }
 });
 
